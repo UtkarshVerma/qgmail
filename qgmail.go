@@ -14,6 +14,7 @@ var (
 	conf       *config
 
 	// Command line flags.
+	// Port must be random
 	configFile   = flag.String("c", homeDir+"/.config/qgmail/config.json", "path to config file")
 	credsFile    = flag.String("creds", homeDir+"/.config/qgmail/credentials.json", "path to credentials file")
 	tokenFile    = flag.String("t", homeDir+"/.config/qgmail/token.json", "path to token file")
