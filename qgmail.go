@@ -14,11 +14,10 @@ var (
 	conf       *config
 
 	// Command line flags.
-	// Port must be random
-	configFile   = flag.String("c", homeDir+"/.config/qgmail/config.json", "path to config file")
-	credsFile    = flag.String("creds", homeDir+"/.config/qgmail/credentials.json", "path to credentials file")
-	tokenFile    = flag.String("t", homeDir+"/.config/qgmail/token.json", "path to token file")
-	redirectPort = flag.Int("rport", 5000, "redirect URL port for the HTTP server")
+	initFlag   = flag.Bool("init", false, "Reconfigure qGmail.")
+	configFile = flag.String("c", homeDir+"/.config/qgmail/config.json", "path to config file")
+	credsFile  = flag.String("creds", homeDir+"/.config/qgmail/credentials.json", "path to credentials file")
+	tokenFile  = flag.String("t", homeDir+"/.config/qgmail/token.json", "path to token file")
 )
 
 func init() {
@@ -31,15 +30,25 @@ func init() {
 }
 
 func main() {
-	// Retrieve the token.
 	oauthConf := newOauthConf(*credsFile, conf)
+
+	if *initFlag {
+		token := getTokenFromWeb(oauthConf)
+		saveToken(conf.TokenFile, token)
+		return
+	}
+
 	token, err := tokenFromFile(conf.TokenFile)
 	if err != nil {
+		*initFlag = true
+		fmt.Print("Authorization token not present. Fetching a new one...")
 		token = getTokenFromWeb(oauthConf)
 		saveToken(conf.TokenFile, token)
 	}
 
-	service, _ := newGmailService(oauthConf, token)
-	labelStruct := getLabel("INBOX", service)
-	fmt.Println(labelStruct.MessagesUnread)
+	if !*initFlag {
+		service, _ := newGmailService(oauthConf, token)
+		labelStruct := getLabel("INBOX", service)
+		fmt.Println(labelStruct.MessagesUnread)
+	}
 }
