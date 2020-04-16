@@ -35,7 +35,7 @@ func (conf *config) updateConfig(f *flag.Flag) {
 
 func (conf *config) readConfig(configFile string) {
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		log.Fatalf("%s: no such file or directory", configFile)
+		log.Fatal("Error: The configuration file doesn't exist.")
 	} else {
 		f, _ := os.Open(configFile)
 		defer f.Close()
@@ -43,7 +43,7 @@ func (conf *config) readConfig(configFile string) {
 		byteValue, _ := ioutil.ReadAll(f)
 
 		if err = json.Unmarshal(byteValue, conf); err != nil {
-			log.Fatalf("%s: %v", configFile, err)
+			log.Fatalf("Error: Could not parse the configuration file.\n%v", err)
 		}
 	}
 

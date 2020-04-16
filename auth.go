@@ -43,6 +43,11 @@ type (
 	}
 )
 
+var (
+	oauthConf *oauth2.Config
+	mustPaste = false
+)
+
 func newAuthParams() *authParams {
 	a := &authParams{
 		CodeVerifier: generateRandomString(43),
@@ -68,8 +73,18 @@ func newGmailService(config *oauth2.Config, token *oauth2.Token) (*gmail.Service
 }
 
 func newOauthConf(credsFile string, conf *config) *oauth2.Config {
+	var redirectURL string
+
+	redirectPort, err := getRandomPort()
+	// Use manual copy/paste method if error occurs.
+	if err != nil {
+		mustPaste = true
+		redirectURL = "urn:ietf:wg:oauth:2.0:oob"
+	} else {
+		redirectURL = "http://localhost" + redirectPort
+	}
 	oauthConf := &oauth2.Config{
-		RedirectURL: "http://localhost:3000",
+		RedirectURL: redirectURL,
 		Scopes:      auth.Request.Scopes,
 	}
 	readCredentials(credsFile, oauthConf)
@@ -86,41 +101,45 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 	}
 
 	// Fetch the authorization code.
-	openURL(config.AuthCodeURL(auth.Request.State, opts...))
-	// will the localhost server ever fail?
-	fmt.Println("Opening browser for user consent...")
-	time.Sleep(2 * time.Second)
-	auth.Response.getAuthCode("localhost:3000")
+	authURL := config.AuthCodeURL(auth.Request.State, opts...)
+	auth.Response.getAuthCode(authURL, mustPaste)
 
 	// Verify state parameter
 	if auth.Request.State != auth.Response.State {
-		log.Fatal("Error: This request wasn't initialised by me.")
+		log.Fatal("Error: This request wasn't initialised by qGmail.")
 	}
 
 	token, err := config.Exchange(context.TODO(), auth.Response.Code,
 		oauth2.SetAuthURLParam("code_verifier", auth.CodeVerifier))
 	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
+		log.Fatalf("Error: Unable to retrieve token from the web.\n%v", err)
 	}
 	return token
 }
 
+func (a *authResponse) getAuthCode(authURL string, mustPaste bool) {
+	if mustPaste {
+		fmt.Println("Paste the authorization code here:")
+		fmt.Scan(a.Code)
+	} else {
+		fmt.Println("Opening browser for user consent...\n" + authURL + "\n")
+		openURL(authURL)
+		time.Sleep(2 * time.Second)
+		a.startHTTPListener()
+	}
+}
+
 func openURL(url string) {
-	var err error
 	switch runtime.GOOS {
 	case "linux":
-		err = exec.Command("xdg-open", url).Start()
+		exec.Command("xdg-open", url).Start()
 	case "windows":
-		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+		exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
 	case "darwin":
-		err = exec.Command("open", url).Start()
+		exec.Command("open", url).Start()
 	default:
-		err = fmt.Errorf("unsupported platform")
-	}
-	if err != nil {
-		log.Fatalf("Unable to open browser: %v\n", err)
-		fmt.Printf("Go to the following link in your browser then paste the "+
-			"authorization code here: \n%v\n", url)
+		fmt.Println("Error: Could not open your browser. Please open the" +
+			" above URL manually and then proceed.")
 	}
 }
 

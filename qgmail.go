@@ -13,11 +13,12 @@ var (
 	auth       = newAuthParams()
 	conf       *config
 
-	// Command line flags.
+	// Command line flags. // add option to override timeout // option to show url // option to force manual paste url
 	initFlag   = flag.Bool("init", false, "Reconfigure qGmail.")
-	configFile = flag.String("c", homeDir+"/.config/qgmail/config.json", "path to config file")
-	credsFile  = flag.String("creds", homeDir+"/.config/qgmail/credentials.json", "path to credentials file")
-	tokenFile  = flag.String("t", homeDir+"/.config/qgmail/token.json", "path to token file")
+	configFile = flag.String("c", homeDir+"/.config/qgmail/config.json", "Path to qGmail's configuration file.")
+	credsFile  = flag.String("creds", homeDir+"/.config/qgmail/credentials.json", "Path to Google API client credentials.")
+	tokenFile  = flag.String("t", homeDir+"/.config/qgmail/token.json", "Path for storing the authorization token.")
+	timeout    = flag.Int("timeout", 1, "Timeout(in minutes) for user-consent page.")
 )
 
 func init() {
@@ -29,8 +30,9 @@ func init() {
 	flag.Visit(conf.updateConfig)
 }
 
+// Display init success
 func main() {
-	oauthConf := newOauthConf(*credsFile, conf)
+	oauthConf = newOauthConf(*credsFile, conf)
 
 	if *initFlag {
 		token := getTokenFromWeb(oauthConf)
