@@ -1,56 +1,38 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 
-	"github.com/mitchellh/go-homedir"
+	"github.com/utkarshverma/qgmail/apicall"
+	"github.com/utkarshverma/qgmail/auth"
+	"github.com/utkarshverma/qgmail/cli"
+	"github.com/utkarshverma/qgmail/config"
 )
 
 var (
-	// use different config locations depending on the os
-	homeDir, _ = homedir.Dir()
-	auth       = newAuthParams()
-	conf       *config
-
-	// Command line flags. // add option to override timeout // option to show url // option to force manual paste url
-	initFlag   = flag.Bool("init", false, "Reconfigure qGmail.")
-	configFile = flag.String("c", homeDir+"/.config/qgmail/config.json", "Path to qGmail's configuration file.")
-	credsFile  = flag.String("creds", homeDir+"/.config/qgmail/credentials.json", "Path to Google API client credentials.")
-	tokenFile  = flag.String("t", homeDir+"/.config/qgmail/token.json", "Path for storing the authorization token.")
-	timeout    = flag.Int("timeout", 1, "Timeout(in minutes) for user-consent page.")
+	oAuthConf, token      = auth.Config, &auth.Token
+	configFile, tokenFile = **config.FileName, **config.TokenFile
 )
 
-func init() {
-	flag.Parse()
-
-	// Read the config and credentials.
-	conf = newConfig()
-	conf.readConfig(*configFile)
-	flag.Visit(conf.updateConfig)
-}
-
-// Display init success
 func main() {
-	oauthConf = newOauthConf(*credsFile, conf)
-
-	if *initFlag {
-		token := getTokenFromWeb(oauthConf)
-		saveToken(conf.TokenFile, token)
+	if cli.InitMode {
+		auth.GetToken(oAuthConf, token, auth.Params)
+		auth.SaveToken(tokenFile, *token)
 		return
 	}
 
-	token, err := tokenFromFile(conf.TokenFile)
+	err := auth.ReadToken(tokenFile, token)
 	if err != nil {
-		*initFlag = true
-		fmt.Print("Authorization token not present. Fetching a new one...")
-		token = getTokenFromWeb(oauthConf)
-		saveToken(conf.TokenFile, token)
+		cli.InitMode = true
+		fmt.Println("Authorization token not found. Fetching a new one...")
+		auth.GetToken(oAuthConf, token, auth.Params)
+		auth.SaveToken(tokenFile, *token)
+		fmt.Printf("%+v", *token)
 	}
 
-	if !*initFlag {
-		service, _ := newGmailService(oauthConf, token)
-		labelStruct := getLabel("INBOX", service)
-		fmt.Println(labelStruct.MessagesUnread)
+	if !cli.InitMode {
+		service, _ := auth.NewGmailService(auth.Config, *token)
+		label := apicall.Label("INBOX", service)
+		fmt.Println(label.MessagesUnread)
 	}
 }

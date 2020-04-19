@@ -1,25 +1,26 @@
-package main
+package http
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/utkarshverma/qgmail/config"
 )
 
 var listener net.Listener
 
-func getRandomPort() (string, error) {
+func RandomPort() (string, error) {
 	listener, err := net.Listen("tcp", "localhost:0")
 	defer listener.Close()
 	return ":" + strconv.Itoa(listener.Addr().(*net.TCPAddr).Port), err
 }
 
-func (a *authResponse) startHTTPListener() {
-	listener, _ = net.Listen("tcp", oauthConf.RedirectURL[7:])
+func StartServer(address string, code, state *string) {
+	listener, _ = net.Listen("tcp", address)
 	svr := http.Server{}
 	defer svr.Close()
 
@@ -27,13 +28,15 @@ func (a *authResponse) startHTTPListener() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
+
+		// Check if user has authorized qGmail.
 		if len(q.Get("error")) == 0 {
 			io.WriteString(w, "qGmail has successfully received user's consent. You may close this tab.")
-			a.Code = q.Get("code")
-			a.State = q.Get("state")
+			*code = q.Get("code")
+			*state = q.Get("state")
 			receivedFlag <- true
 		} else {
-			io.WriteString(w, "The user declined authorization request for qGmail.")
+			io.WriteString(w, "Error: The user declined the authorization request for qGmail.")
 			receivedFlag <- false
 		}
 	})
@@ -47,12 +50,10 @@ func (a *authResponse) startHTTPListener() {
 	// Wait for an HTTP request for some time.
 	select {
 	case rf := <-receivedFlag:
-		if rf {
-			fmt.Println("qGmail has been successfully authorized.")
-		} else {
+		if !rf {
 			log.Fatal("qGmail was not authorized by the user.")
 		}
-	case <-time.After(time.Duration(*timeout) * time.Minute):
+	case <-time.After(time.Duration(*config.Init.Timeout) * time.Minute):
 		log.Fatal("Error: Failed to authorize qGmail due to timeout.")
 	}
 }

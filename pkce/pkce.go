@@ -1,4 +1,4 @@
-package main
+package pkce
 
 import (
 	"crypto/sha256"
@@ -14,7 +14,8 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func generateRandomString(length int) string {
+// RandomString generates a random string.
+func RandomString(length int) string {
 	b := make([]byte, length)
 	for i := range b {
 		b[i] = characters[rand.Intn(len(characters))]
@@ -22,13 +23,15 @@ func generateRandomString(length int) string {
 	return string(b)
 }
 
-func createCodeVerifier(length int) string {
-	codeVerifier := generateRandomString(length)
+// CodeVerifier creates a code verifier for OAuth2.
+func CodeVerifier(length int) string {
+	codeVerifier := RandomString(length)
 	return codeVerifier
 }
 
-func createCodeChallenge(codeVerifier string, codeChallengeMethod string) string {
-	if codeChallengeMethod == "plain" {
+// CodeChallenge creates a code challenge for OAuth2.
+func CodeChallenge(codeVerifier string, method string) string {
+	if method == "plain" {
 		return codeVerifier
 	}
 	hash := sha256.Sum256([]byte(codeVerifier))
