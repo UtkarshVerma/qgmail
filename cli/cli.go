@@ -2,7 +2,6 @@ package cli
 
 import (
 	"flag"
-	"log"
 	"os"
 )
 
@@ -24,13 +23,13 @@ func init() {
 			CredsFile = InitCmd.String("creds", "~/.config/qgmail/credentials.json", "Path to Google API client credentials.")
 			TokenFile = InitCmd.String("token", "~/.config/qgmail/token.json", "Path for storing the authorization token.")
 			InitCmd.Parse(os.Args[2:])
-		default:
-			log.Fatal("Invalid argument passed. Run 'qgmail --help` for valid options.")
 		}
+
+		// To future self: add default case.
 	}
-	flag.Parse()
-	if InitMode = InitCmd.Parsed(); InitMode {
+	if InitMode = InitCmd.Parsed(); !InitMode {
 		CredsFile = flag.String("creds", "~/.config/qgmail/credentials.json", "Path to Google API client credentials.")
 		TokenFile = flag.String("token", "~/.config/qgmail/token.json", "Path for storing the authorization token.")
 	}
+	flag.Parse()
 }
