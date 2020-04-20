@@ -48,14 +48,14 @@ If you feel that there's a feature this app is lacking, [post a feature request]
 ### 2. Testing
 There are cases when fixing a bug triggers another bug, which I might not notice during testing myself. Having more users would be a great help to close in on such bugs.
 If you encounter some bugs, [post an issue regarding the bug](https://github.com/UtkarshVerma/qgmail/issues/new).
-### Pull Requests
+### 3. Pull Requests
 I'm maintaining this open-source project as a personal interest without any profits, hence I'll only be developing qGmail if I have the time and motivation to do so. Therefore, PRs from other developers are highly welcomed.
 
 ## Dependencies
 qGmail stands on the shoulder of many great open-source libraries, in lexical order:
 | **Dependency**|**License**|
 |:---:|:---:|
-|google.golang.org/api|BSD-3 Clause|
-|github.com/mitchellh/go-homedir|MIT License|
-|golang.org/x/net| BSD-3 Clause|
-|golang.org/x/oauth2| BSD-3 Clause|
+|[google.golang.org/api](https://google.golang.org/api)|BSD-3 Clause|
+|[github.com/mitchellh/go-homedir](https://github.com/mitchellh/go-homedir)|MIT License|
+|[golang.org/x/net](https://golang.org/x/net)| BSD-3 Clause|
+|[golang.org/x/oauth2](https://golang.org/x/oauth2)| BSD-3 Clause|
