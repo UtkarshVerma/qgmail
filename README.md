@@ -26,8 +26,13 @@ cd qgmail
 go install
 ```
 ## Usage
-Using `qgmail` is easy, just get yourself OAuth2 client credentials from Google API Console and place it in `~/.config/qgmail`.
-After that, just run `qgmail init` and follow the on-screen instructions to authorize qGmail.
+To get started:
+*  [Create OAuth2 Credentials](https://developers.google.com/identity/protocols/oauth2#1-obtain-oauth-20-credentials-from-the-google-api-console) using Google API Console.
+* Make sure your API Console client has access to Gmail API.
+* Download your OAuth2 credentials as `credentials.json` and paste it in `~/.config/qgmail`.
+* Run `qgmail init`.
+* Follow the on-screen instructions to authorize qGmail.
+
 Once the initialisation is done, just simply use `qgmail` to access the API.
 
 ### CLI
