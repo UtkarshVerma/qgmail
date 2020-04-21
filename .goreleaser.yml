@@ -1,0 +1,73 @@
+project_name: qgmail
+
+builds:
+  -
+    env:
+      - CGO_ENABLED=0
+    binary: qgmail
+    id: qgmail
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - 386
+      - arm
+      - arm64
+
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+
+release:
+  draft: true
+
+archives:
+  -
+    id: qgmail
+    builds: ['qgmail']
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
+    replacements:
+      amd64: 64bit
+      386: 32bit
+      arm: ARM
+      arm64: ARM64
+      darwin: macOS
+      linux: Linux
+      windows: Windows
+    files:
+      - README.md
+      - LICENSE
+
+nfpms:
+  -
+    id: qgmail
+    builds: ['qgmail']
+    formats:
+        - deb
+    vendor: "utkarshverma"
+    homepage: "https://github.com/utkarshverma/qgmail"
+    maintainer: "Utkarsh Verma <utkarshverma@protonmail.com>"
+    description: "A fast and lightweight CLI tool which brings the power of Gmail API to your terminal."
+    license: "GPL-3.0"
+    file_name_template: "{{.ProjectName}}_v{{.Version}}_{{.Os}}-{{.Arch}}"
+    replacements:
+      amd64: 64bit
+      386: 32bit
+      arm: ARM
+      arm64: ARM64
+      darwin: macOS
+      linux: Linux
+      windows: Windows
