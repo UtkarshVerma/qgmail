@@ -12,6 +12,7 @@ Currently, qGmail officially supports Linux distros only but it is planned to im
 
 ## Choose How to Install
 ### 1. Binary Install
+You can download pre-built binaries from [qGmail's releases](https://github.com/UtkarshVerma/qgmail/releases) page.
 ### 2. Building from Source
 #### Prerequisite tools
 * [Git](https://git-scm.com/)
