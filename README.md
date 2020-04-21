@@ -1,4 +1,5 @@
 # qGmail
+[![asciicast](https://asciinema.org/a/IAs92tV85czsi0bnPBLR1Pxee.svg)](https://asciinema.org/a/IAs92tV85czsi0bnPBLR1Pxee)
 A fast and lightweight CLI app which brings the power of [Gmail API](https://developers.google.com/gmail/api) to your terminal.
 
 ## Overview
