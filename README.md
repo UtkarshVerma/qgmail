@@ -37,6 +37,18 @@ To get started:
 
 Once the initialisation is done, just simply use `qgmail` to access the API.
 
+> If you want to use `qGmail` for multiple accounts in your status bar,  you can do so by specifying a different path for saving the OAuth tokens through the `-token` flag. For example:
+>```sh
+># For personal account, use default path for the token.
+>qgmail
+>
+># For alternate account, use another path for the token.
+>qgmail -token ~/.config/qgmail/alternate_token.json
+>```
+
+### Configuration
+qGmail looks for configuration parameters in `~/.config/qgmail/config.json` by default, which you may override using the `-config` flag.
+
 ### CLI
 qGmail provides some CLI flags to help you configure it on the go. To know about them, just use `qgmail --help`, or `qgmail init --help`.
 
