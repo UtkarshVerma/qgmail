@@ -61,13 +61,19 @@ func init() {
 	*config.TokenFile, _ = homedir.Expand(*config.TokenFile)
 }
 
-func (conf *conf) read(configFile string) {
-	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		log.Fatal(err)
+func (conf *conf) read(configPath string) {
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		// If the config file doesn't exist at default path, create it.
+		if defaultPath, _ := homedir.Expand("~/.config/qgmail/config.json"); configPath == defaultPath {
+			configFile, _ := json.MarshalIndent(*config, "", "\t")
+			_ = ioutil.WriteFile(configPath, configFile, 0644)
+		} else {
+			log.Fatal(err)
+		}
 	} else {
 		c := &tmpConf{}
 
-		f, _ := os.Open(configFile)
+		f, _ := os.Open(configPath)
 		defer f.Close()
 
 		byteValue, _ := ioutil.ReadAll(f)

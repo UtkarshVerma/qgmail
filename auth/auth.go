@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"runtime"
 	"time"
 
@@ -156,7 +157,6 @@ func GetToken(conf *oauth2.Config, token **oauth2.Token, params *params) {
 		log.Fatalf("Error: Unable to retrieve token from the web.\n%v", err)
 	} else {
 		*token = tok
-		fmt.Printf("%+v", *Token)
 		fmt.Println("qGmail has been successfully authorized.")
 	}
 }
@@ -175,8 +175,7 @@ func getAuthCode(conf *oauth2.Config, authURL string, params *params) {
 	if *mustPaste {
 		fmt.Println("Paste the authorization code here:")
 		if _, err := fmt.Scan(code); err != nil {
-			fmt.Println()
-			log.Fatalf("Unable to read authorization code: %v", err)
+			log.Fatalf("\nUnable to read authorization code: %v", err)
 		}
 		fmt.Println()
 	} else {
@@ -198,14 +197,18 @@ func openURL(url string) {
 	}
 }
 
-func SaveToken(tokenFile string, token *oauth2.Token) {
-	// can't create a folder
-	f, err := os.OpenFile(tokenFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
-	if err != nil {
-		log.Fatalf("Error: Unable to cache oauth token.\n%v", err)
+func SaveToken(tokenPath string, token *oauth2.Token) {
+	tokenFile, _ := json.Marshal(*token)
+
+	// Create parent folders if non-existent.
+	tokenDir := path.Dir(tokenPath)
+	if _, err := os.Stat(tokenDir); os.IsNotExist(err) {
+		os.MkdirAll(tokenDir, os.ModePerm)
 	}
-	defer f.Close()
-	json.NewEncoder(f).Encode(token)
+
+	if err := ioutil.WriteFile(tokenPath, tokenFile, 0600); err != nil {
+		log.Fatalf("Error: Unable to cache OAuth token.\n%v", err)
+	}
 }
 
 func ReadToken(tokenFile string, token **oauth2.Token) error {

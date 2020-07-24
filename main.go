@@ -27,7 +27,6 @@ func main() {
 		fmt.Println("Authorization token not found. Fetching a new one...")
 		auth.GetToken(oAuthConf, token, auth.Params)
 		auth.SaveToken(tokenFile, *token)
-		fmt.Printf("%+v", *token)
 	}
 
 	if !cli.InitMode {
