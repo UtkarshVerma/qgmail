@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path"
 	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -49,25 +48,19 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", `config file (default "$HOME/.config/qgmail/config.(json|toml|yaml)")`)
+	rootCmd.PersistentFlags().StringVar(&configFile, "config", "$HOME/.config/qgmail/config.json", "config file")
 	rootCmd.PersistentFlags().StringVar(&tokenFile, "token", "$HOME/.cache/qgmail/token.json", "cached token file")
 
 	home, err := homedir.Dir()
 	cobra.CheckErr(err)
-	tokenFile = strings.Replace(tokenFile, "$HOME", home, 1)
+	for _, flag := range []*string{&configFile, &tokenFile} {
+		*flag = strings.Replace(*flag, "$HOME", home, 1)
+	}
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	// No need for error checking here as `homedir.Dir()` is already checked in `init()`
-	home, _ := homedir.Dir()
-	if configFile == "" {
-		viper.AddConfigPath(path.Join(home, ".config", "qgmail"))
-		viper.SetConfigName("config")
-	} else {
-		viper.SetConfigFile(configFile)
-	}
-
+	viper.SetConfigFile(configFile)
 	viper.AutomaticEnv() // read in environment variables that match
 	viper.ReadInConfig() // read in config, if exists
 }
