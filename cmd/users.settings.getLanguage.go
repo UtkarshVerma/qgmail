@@ -4,6 +4,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"encoding/json"
 
 	"github.com/UtkarshVerma/qgmail/auth"
 	"github.com/spf13/cobra"
@@ -26,7 +27,9 @@ var usersSettingsGetLanguage = &cobra.Command{
 
 		val, err := service.Users.Settings.GetLanguage(args[0]).Do()
 		cobra.CheckErr(err)
-		fmt.Println(val)
+
+		jsonData, _ := json.Marshal(val)
+		fmt.Println(string(jsonData))
 	},
 }
 
