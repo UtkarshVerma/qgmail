@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 
@@ -60,8 +61,13 @@ func init() {
 	params.Request.CodeChallenge = pkce.CodeChallenge(params.CodeVerifier,
 		params.Request.CodeChallengeMethod)
 
+	redirectPort, err := getRandomPort()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	config = &oauth2.Config{
-		RedirectURL: "urn:ietf:wg:oauth:2.0:oob",
+		RedirectURL: "http://localhost" + redirectPort,
 		Scopes:      params.Request.Scopes,
 	}
 }
@@ -123,15 +129,9 @@ func fetchAuthCode() {
 	}
 	authURL := config.AuthCodeURL(params.Request.State, opts...)
 
-	code := &params.Response.Code
 	fmt.Printf("Open the following link in your web browser:\n%s\n\n",
 		authURL)
-	fmt.Println("Paste the authorization code here:")
-	if _, err := fmt.Scan(code); err != nil {
-		fmt.Printf("\nUnable to read authorization code: %v", err)
-		os.Exit(1)
-	}
-	fmt.Println()
+	params.Response.fetchFromHTTP()
 }
 
 // SaveToken saves `Token` at `tokenPath`.
